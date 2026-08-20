@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "a": {
+      "label": "Option A",
+      "statement": "Du darfst nie wieder duschen – aber deine Zuschauer riechen dich irgendwie durch den Bildschirm.",
+      "image": "/dilemmas/r1a.png",
+      "attributes": ["Körpergeruch", "Zuschauerschreck", "Hygieneverweigerer"]
+    },
+    "b": {
+      "label": "Option B",
+      "statement": "Du musst jeden einzelnen Stream in einem feuchten Ganzkörper-Dino-Kostüm verbringen.",
+      "image": "/dilemmas/r1b.png",
+      "attributes": ["Schwitzig", "Saurier-Vibe", "Maskottchen"]
+    }
+  },
+  {
+    "id": 2,
+    "a": {
+      "label": "Option A",
+      "statement": "Jedes Mal wenn du \"Poggers\" sagst, verlierst du 5 Follower – für immer und unwiderruflich.",
+      "image": "/dilemmas/r2a.png",
+      "attributes": ["Poggers-Phobie", "Follower-Schwund", "Sprachverbot"]
+    },
+    "b": {
+      "label": "Option B",
+      "statement": "Deine Mutter moderiert ab sofort deinen Chat und liest jede Donation mit voller Inbrunst vor.",
+      "image": "/dilemmas/r2b.png",
+      "attributes": ["Mutter-Aufsicht", "Cringe-Donations", "Familienfreundlich"]
+    }
+  },
+  {
+    "id": 3,
+    "a": {
+      "label": "Option A",
+      "statement": "Du kannst nur noch über Kazoo-Geräusche kommunizieren. Für den Rest deiner Karriere.",
+      "image": "/dilemmas/r3a.png",
+      "attributes": ["Tröt-Sprache", "Kazoo-Meister", "Mundfaul"]
+    },
+    "b": {
+      "label": "Option B",
+      "statement": "Deine Webcam zeigt permanent und ungefiltert deinen kompletten Browserverlauf.",
+      "image": "/dilemmas/r3b.png",
+      "attributes": ["Keine Privatsphäre", "Verlaufs-Enthüllung", "Mut zum Risiko"]
+    }
+  }
+]

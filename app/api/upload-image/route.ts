@@ -4,6 +4,10 @@ import { join } from 'path'
 import { existsSync } from 'fs'
 
 export async function POST(req: Request) {
+  if (process.env.NODE_ENV !== 'development') {
+    return new NextResponse('Not allowed in production', { status: 403 })
+  }
+
   try {
     const formData = await req.formData()
     const file = formData.get('file') as File | null

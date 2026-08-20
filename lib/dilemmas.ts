@@ -1,3 +1,5 @@
+import dilemmasData from '@/data/dilemmas.json'
+
 export type Option = {
   label: string
   statement: string
@@ -11,53 +13,7 @@ export type Dilemma = {
   b: Option
 }
 
-export const dilemmas: Dilemma[] = [
-  {
-    id: 1,
-    a: {
-      label: 'Option A',
-      statement:
-        'Du darfst nie wieder duschen – aber deine Zuschauer riechen dich irgendwie durch den Bildschirm.',
-      image: '/dilemmas/r1a.png',
-    },
-    b: {
-      label: 'Option B',
-      statement:
-        'Du musst jeden einzelnen Stream in einem feuchten Ganzkörper-Dino-Kostüm verbringen.',
-      image: '/dilemmas/r1b.png',
-    },
-  },
-  {
-    id: 2,
-    a: {
-      label: 'Option A',
-      statement:
-        'Jedes Mal wenn du "Poggers" sagst, verlierst du 5 Follower – für immer und unwiderruflich.',
-      image: '/dilemmas/r2a.png',
-    },
-    b: {
-      label: 'Option B',
-      statement:
-        'Deine Mutter moderiert ab sofort deinen Chat und liest jede Donation mit voller Inbrunst vor.',
-      image: '/dilemmas/r2b.png',
-    },
-  },
-  {
-    id: 3,
-    a: {
-      label: 'Option A',
-      statement:
-        'Du kannst nur noch über Kazoo-Geräusche kommunizieren. Für den Rest deiner Karriere.',
-      image: '/dilemmas/r3a.png',
-    },
-    b: {
-      label: 'Option B',
-      statement:
-        'Deine Webcam zeigt permanent und ungefiltert deinen kompletten Browserverlauf.',
-      image: '/dilemmas/r3b.png',
-    },
-  },
-]
+export const dilemmas: Dilemma[] = dilemmasData as Dilemma[]
 
 export const verdicts: string[] = [
   'Du bist ein Soziopath! Sogar der Chat hat kurz Angst bekommen.',
