@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 
@@ -12,12 +12,10 @@ type Card = {
 
 type Props = {
   cards: Card[]
-  onAdd: (c: Card) => void
-  onUpdate: (c: Card) => void
-  onDelete: (id: string) => void
+  onRefresh: () => void
 }
 
-export default function CardEditor({ cards, onAdd, onUpdate, onDelete }: Props) {
+export default function CardEditor({ cards, onRefresh }: Props) {
   if (process.env.NODE_ENV !== 'development') {
     return null
   }
@@ -78,14 +76,14 @@ export default function CardEditor({ cards, onAdd, onUpdate, onDelete }: Props) 
       setEditing(cards[0])
       setIsNew(false)
     }
-  }, [])
+  }, [cards])
 
   function startNew() {
     setEditing({ ...empty, id: Date.now().toString() })
     setIsNew(true)
   }
 
-  function save() {
+  async function save() {
     if (!editing.id) editing.id = Date.now().toString()
     const savedAttributes = [
       editing.attributes?.[0] || '',
@@ -93,22 +91,67 @@ export default function CardEditor({ cards, onAdd, onUpdate, onDelete }: Props) 
       editing.attributes?.[2] || '',
     ]
     const updatedCard = { ...editing, attributes: savedAttributes }
-    if (isNew) onAdd(updatedCard)
-    else onUpdate(updatedCard)
-    setIsNew(false)
+    
+    let newCards: Card[]
+    if (isNew) {
+      newCards = [updatedCard, ...cards]
+    } else {
+      newCards = cards.map((c) => (c.id === updatedCard.id ? updatedCard : c))
+    }
+
+    try {
+      const res = await fetch('/api/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cards: newCards }),
+      })
+      if (res.ok) {
+        onRefresh()
+        setIsNew(false)
+      } else {
+        alert('Fehler beim Speichern')
+      }
+    } catch (err) {
+      console.error('Save failed', err)
+      alert('Fehler beim Speichern')
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Wirklich löschen?')) return
+    const newCards = cards.filter((c) => c.id !== id)
+    try {
+      const res = await fetch('/api/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cards: newCards }),
+      })
+      if (res.ok) {
+        onRefresh()
+        if (editing.id === id) {
+          setEditing(empty)
+          setIsNew(true)
+        }
+      } else {
+        alert('Fehler beim Löschen')
+      }
+    } catch (err) {
+      console.error('Delete failed', err)
+      alert('Fehler beim Löschen')
+    }
   }
 
   return (
     <section className="mb-6 rounded-lg border-2 border-[var(--color-gold)] bg-secondary/10 p-4 gold-frame">
       <div className="flex items-center justify-between">
-        <h3 className="mb-3 text-sm font-bold ornament-top">Karten-Pool</h3>
+        <h3 className="mb-3 text-sm font-bold ornament-top">Karten-Pool (API)</h3>
         <div className="flex gap-2">
           <button onClick={startNew} className="medieval-button text-xs">✨ Neue Karte ✨</button>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="col-span-1 max-h-56 overflow-auto">
+        <div className="col-span-1 max-h-[500px] overflow-auto">
           <ul className="space-y-2">
             {cards.map((c) => (
               <li key={c.id} className="flex items-center justify-between rounded-md border-2 border-[var(--color-bronze)] p-2 gold-frame bg-card/50">
@@ -117,7 +160,7 @@ export default function CardEditor({ cards, onAdd, onUpdate, onDelete }: Props) 
                   <div className="text-xs text-muted-foreground">Schwere: {c.severity}</div>
                 </button>
                 <div className="flex gap-2">
-                  <button onClick={() => onDelete(c.id)} className="text-xs text-destructive hover:text-destructive/70 transition-colors">🗑️ Löschen</button>
+                  <button onClick={() => handleDelete(c.id)} className="text-xs text-destructive hover:text-destructive/70 transition-colors">🗑️ Löschen</button>
                 </div>
               </li>
             ))}

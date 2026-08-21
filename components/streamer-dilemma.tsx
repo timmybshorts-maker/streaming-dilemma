@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Zap, Settings } from 'lucide-react'
-import { dilemmas, fallbackSteckbrief, type ChoiceLog, type Steckbrief } from '@/lib/dilemmas'
+import { fallbackSteckbrief, type ChoiceLog, type Steckbrief } from '@/lib/dilemmas'
 import dynamic from 'next/dynamic'
 import { DilemmaCard } from '@/components/dilemma-card'
 
@@ -30,8 +29,23 @@ export function StreamerDilemma() {
   const [generatedText, setGeneratedText] = useState<string | null>(null)
   const choiceLog = useRef<ChoiceLog[]>([])
 
-  // Load state from localStorage
+  // Fetch cards from API
+  const refreshCards = useCallback(async () => {
+    try {
+      const res = await fetch('/api/cards')
+      if (res.ok) {
+        const data = await res.json()
+        setCards(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch cards', err)
+    }
+  }, [])
+
+  // Initial load from API and settings from localStorage
   useEffect(() => {
+    refreshCards()
+
     const savedApiKey = localStorage.getItem('dev-api-key')
     if (savedApiKey) setDevApiKey(savedApiKey)
 
@@ -40,14 +54,7 @@ export function StreamerDilemma() {
 
     const savedModel = localStorage.getItem('dev-model')
     if (savedModel) setDevModel(savedModel)
-  }, [])
-
-  // Persist cards when they change
-  useEffect(() => {
-    if (cards !== null) {
-      localStorage.setItem('streamer-cards', JSON.stringify(cards))
-    }
-  }, [cards])
+  }, [refreshCards])
 
   // Persist settings
   useEffect(() => {
@@ -56,49 +63,7 @@ export function StreamerDilemma() {
     localStorage.setItem('dev-model', devModel)
   }, [devApiKey, devProvider, devModel])
 
-  // Build a flat card pool from the shipped dilemmas (each option becomes a card)
-  const defaultCards = dilemmas.flatMap((d) => [
-    {
-      id: `d-${d.id}-a`,
-      statement: d.a.statement,
-      image: d.a.image,
-      severity: 5,
-      attributes: d.id === 1
-        ? ['Körpergeruch', 'Zuschauerschreck', 'Hygieneverweigerer']
-        : d.id === 2
-          ? ['Poggers-Phobie', 'Follower-Schwund', 'Sprachverbot']
-          : ['Tröt-Sprache', 'Kazoo-Meister', 'Mundfaul']
-    },
-    {
-      id: `d-${d.id}-b`,
-      statement: d.b.statement,
-      image: d.b.image,
-      severity: 5,
-      attributes: d.id === 1
-        ? ['Schwitzig', 'Saurier-Vibe', 'Maskottchen']
-        : d.id === 2
-          ? ['Mutter-Aufsicht', 'Cringe-Donations', 'Familienfreundlich']
-          : ['Keine Privatsphäre', 'Verlaufs-Enthüllung', 'Mut zum Risiko']
-    },
-  ])
-
-  // initialize cards state once using a mounting logic or inline check
-  useEffect(() => {
-    if (cards === null) {
-      const savedCards = localStorage.getItem('streamer-cards')
-      if (savedCards) {
-        try {
-          setCards(JSON.parse(savedCards))
-        } catch (e) {
-          setCards(defaultCards)
-        }
-      } else {
-        setCards(defaultCards)
-      }
-    }
-  }, [cards])
-
-  const cardPool = cards ?? defaultCards
+  const cardPool = cards || []
 
   // handle a user's choice during an active game round
   const handleChoose = useCallback(
@@ -164,7 +129,7 @@ export function StreamerDilemma() {
         setCurrentPairIdx(next)
       }
     },
-    [currentPairIdx, gamePairs, collectedAttributes],
+    [currentPairIdx, gamePairs, collectedAttributes, devApiKey, devProvider, devModel],
   )
 
   const handleNext = useCallback(() => {
@@ -224,9 +189,7 @@ export function StreamerDilemma() {
             </div>
             <CardEditor
               cards={cardPool}
-              onAdd={(c) => setCards((prev) => [c, ...(prev || [])])}
-              onUpdate={(c) => setCards((prev) => (prev || []).map((p) => (p.id === c.id ? c : p)))}
-              onDelete={(id) => setCards((prev) => (prev || []).filter((p) => p.id !== id))}
+              onRefresh={refreshCards}
             />
           </div>
         )}
