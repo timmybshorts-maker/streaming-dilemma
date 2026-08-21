@@ -1,4 +1,3 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createXai } from '@ai-sdk/xai';
 import { generateText } from 'ai';
 import { type ChoiceLog } from '@/lib/dilemmas';
@@ -7,28 +6,24 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { choices, customApiKey, provider = 'google', model = 'gemini-1.5-flash' } = await req.json();
+    const { choices } = await req.json();
     
-    const apiKey = customApiKey || (provider === 'xai' ? process.env.XAI_API_KEY : process.env.GEMINI_API_KEY);
+    // We strictly use GROK_API_KEY from process.env on the server.
+    const apiKey = process.env.GROK_API_KEY;
 
     if (!apiKey) {
-      return Response.json({ error: `Kein API-Key für ${provider} konfiguriert. Bitte im Dev-Modus einen Key hinterlegen.` }, { status: 400 });
+      return Response.json(
+        { error: 'Grok API Key nicht konfiguriert. Bitte setze GROK_API_KEY im Server-Environment.' },
+        { status: 500 }
+      );
     }
 
     const decisionText = (choices as ChoiceLog[])
       .map((c, i) => `Runde ${i + 1}: wählte "${c.statement}"`)
       .join('\n');
 
-    let aiModel;
-    if (provider === 'xai') {
-      const xai = createXai({ apiKey });
-      // xAI uses grok-2-1212 or similar modern model names. Map to grok-2 if chosen
-      const mappedModel = model.startsWith('grok') ? model : 'grok-2';
-      aiModel = xai(mappedModel);
-    } else {
-      const google = createGoogleGenerativeAI({ apiKey });
-      aiModel = google(model);
-    }
+    const xai = createXai({ apiKey });
+    const aiModel = xai('grok-3');
 
     const { text } = await generateText({
       model: aiModel,
@@ -48,8 +43,8 @@ export async function POST(req: Request) {
     });
 
     return Response.json({ text });
-  } catch (error) {
-    console.error('Gemini API Error:', error);
+  } catch (error: any) {
+    console.error('Grok API Error:', error);
     return Response.json({ error: 'Die höfische Schreibstube ist überlastet. (API-Fehler)' }, { status: 500 });
   }
 }

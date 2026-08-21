@@ -23,9 +23,6 @@ export function StreamerDilemma() {
   const [collectedAttributes, setCollectedAttributes] = useState<string[]>([])
   const [analyzing, setAnalyzing] = useState(false)
   const [decided, setDecided] = useState(0)
-  const [devApiKey, setDevApiKey] = useState('')
-  const [devProvider, setDevProvider] = useState<'google' | 'xai'>('xai')
-  const [devModel, setDevModel] = useState('grok-3')
   const [generatedText, setGeneratedText] = useState<string | null>(null)
   const choiceLog = useRef<ChoiceLog[]>([])
 
@@ -42,26 +39,10 @@ export function StreamerDilemma() {
     }
   }, [])
 
-  // Initial load from API and settings from localStorage
+  // Initial load from API
   useEffect(() => {
     refreshCards()
-
-    const savedApiKey = localStorage.getItem('dev-api-key')
-    if (savedApiKey) setDevApiKey(savedApiKey)
-
-    const savedProvider = localStorage.getItem('dev-provider') as 'google' | 'xai'
-    if (savedProvider) setDevProvider(savedProvider)
-
-    const savedModel = localStorage.getItem('dev-model')
-    if (savedModel) setDevModel(savedModel)
   }, [refreshCards])
-
-  // Persist settings
-  useEffect(() => {
-    localStorage.setItem('dev-api-key', devApiKey)
-    localStorage.setItem('dev-provider', devProvider)
-    localStorage.setItem('dev-model', devModel)
-  }, [devApiKey, devProvider, devModel])
 
   const cardPool = cards || []
 
@@ -93,10 +74,7 @@ export function StreamerDilemma() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
-                choices: choiceLog.current,
-                customApiKey: devApiKey || undefined,
-                provider: devProvider,
-                model: devModel
+                choices: choiceLog.current
               }),
             })
             if (!res.ok) {
@@ -129,7 +107,7 @@ export function StreamerDilemma() {
         setCurrentPairIdx(next)
       }
     },
-    [currentPairIdx, gamePairs, collectedAttributes, devApiKey, devProvider, devModel],
+    [currentPairIdx, gamePairs, collectedAttributes],
   )
 
   const handleNext = useCallback(() => {
@@ -175,18 +153,6 @@ export function StreamerDilemma() {
       <div className="relative mx-auto flex flex-1 w-full max-w-7xl flex-col px-4 py-10 md:px-8 md:py-14">
         {process.env.NODE_ENV === 'development' && (
           <div className="space-y-6">
-            <div className="bg-black/50 p-4 rounded-xl border border-[var(--color-gold)]/30 backdrop-blur-md">
-              <div>
-                <label className="block text-xs font-mono mb-2 text-[var(--color-gold)] text-center">xAI (Grok 3) API Key</label>
-                <input 
-                  type="password" 
-                  value={devApiKey} 
-                  onChange={(e) => setDevApiKey(e.target.value)}
-                  placeholder="Hinterlege hier deinen xAI API-Key..."
-                  className="w-full bg-stone-900 border border-stone-700 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-[var(--color-gold)]"
-                />
-              </div>
-            </div>
             <CardEditor
               cards={cardPool}
               onRefresh={refreshCards}
