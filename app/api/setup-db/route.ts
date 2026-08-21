@@ -4,10 +4,7 @@ import fs from 'fs/promises'
 import path from 'path'
 
 export async function GET() {
-  if (process.env.NODE_ENV !== 'development') {
-    return new NextResponse('Not allowed in production', { status: 403 })
-  }
-
+  // Protection temporarily removed to allow running the initial setup on production/live site once.
   const databaseUrl = process.env.DATABASE_URL
   if (!databaseUrl) {
     return NextResponse.json({ error: 'DATABASE_URL env variable is missing' }, { status: 500 })
