@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server'
 import { neon } from '@neondatabase/serverless'
 
 export async function GET() {
-  if (process.env.NODE_ENV !== 'development') {
-    return new NextResponse('Not allowed in production', { status: 403 })
-  }
-
   const databaseUrl = process.env.DATABASE_URL
   if (!databaseUrl) {
     return NextResponse.json({ error: 'DATABASE_URL env variable is missing' }, { status: 500 })
@@ -36,10 +32,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV !== 'development') {
-    return new NextResponse('Not allowed in production', { status: 403 })
-  }
-
+  // Allow modifications to cards (save/delete) on production if needed, or you can restore protections later.
   const databaseUrl = process.env.DATABASE_URL
   if (!databaseUrl) {
     return NextResponse.json({ error: 'DATABASE_URL env variable is missing' }, { status: 500 })
