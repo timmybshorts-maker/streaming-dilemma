@@ -13,6 +13,7 @@ const CardEditor = process.env.NODE_ENV === 'development'
 import { VerdictOverlay } from '@/components/verdict-overlay'
 
 export function StreamerDilemma() {
+  const [showFullscreenLogo, setShowFullscreenLogo] = useState(false)
   const [round, setRound] = useState(0)
   const [choice, setChoice] = useState<'a' | 'b' | null>(null)
   const [steckbrief, setSteckbrief] = useState<Steckbrief | null>(null)
@@ -146,6 +147,75 @@ export function StreamerDilemma() {
 
   return (
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
+      {/* Logo in der oberen linken Ecke */}
+      <div 
+        className="absolute top-6 left-10 md:top-10 md:left-16 z-50 flex flex-col items-center gap-1 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 group"
+        onClick={() => setShowFullscreenLogo(true)}
+      >
+        <Image
+          src="/Timotheus and Timpact.png"
+          alt="Timotheus and Timpact Logo"
+          width={280}
+          height={100}
+          className="h-auto w-44 md:w-64 object-contain filter drop-shadow-[0_8px_24px_rgba(0,0,0,0.8)]"
+          priority
+        />
+        <span className="font-serif text-lg md:text-xl uppercase tracking-[0.3em] text-[var(--color-gold)] font-bold opacity-95 group-hover:opacity-100 transition-all drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+          Credits
+        </span>
+      </div>
+
+      {/* Fullscreen Logo Overlay */}
+      <AnimatePresence>
+        {showFullscreenLogo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowFullscreenLogo(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black cursor-zoom-out"
+          >
+            <Image
+              src="/hallway background.jpg"
+              alt="Hallway Background"
+              fill
+              className="object-cover opacity-60"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80" />
+            
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative z-10 max-w-5xl w-full flex flex-col items-center justify-center p-8"
+            >
+              <Image
+                src="/Timotheus and Timpact.png"
+                alt="Timotheus and Timpact Logo Fullscreen"
+                width={1200}
+                height={600}
+                className="w-full h-auto object-contain filter drop-shadow-[0_0_80px_rgba(59,130,246,0.8)] mb-12"
+                priority
+              />
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="flex flex-col items-center gap-4 text-blue-400 border-2 border-blue-500/40 rounded-2xl px-16 py-10 bg-blue-900/20 backdrop-blur-md shadow-[0_0_60px_rgba(59,130,246,0.2)]"
+              >
+                <span className="font-medieval text-4xl md:text-6xl uppercase tracking-[0.15em] font-bold drop-shadow-[0_0_20px_rgba(59,130,246,0.6)] text-center whitespace-nowrap">
+                  Credits: Timotheus und Timpact
+                </span>
+              </motion.div>
+              <p className="mt-4 text-foreground/60 text-sm font-sans uppercase tracking-widest">
+                Klicken zum Schließen
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="arena-grid pointer-events-none absolute inset-0 opacity-70" />
       <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[42rem] -translate-x-1/2 rounded-full bg-primary/25 blur-[120px]" />
       <div className="pointer-events-none absolute -bottom-40 right-0 h-72 w-96 rounded-full bg-accent/20 blur-[120px]" />

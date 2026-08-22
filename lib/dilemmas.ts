@@ -13,7 +13,26 @@ export type Dilemma = {
   b: Option
 }
 
-export const dilemmas: Dilemma[] = dilemmasData as Dilemma[]
+export const dilemmas: Dilemma[] = (dilemmasData as any[]).reduce<Dilemma[]>((acc, item, idx, arr) => {
+  if (idx % 2 === 0 && idx + 1 < arr.length) {
+    acc.push({
+      id: Math.floor(idx / 2) + 1,
+      a: {
+        label: item.statement,
+        statement: item.statement,
+        image: item.image,
+        attributes: item.attributes,
+      },
+      b: {
+        label: arr[idx + 1].statement,
+        statement: arr[idx + 1].statement,
+        image: arr[idx + 1].image,
+        attributes: arr[idx + 1].attributes,
+      },
+    })
+  }
+  return acc
+}, [])
 
 export const verdicts: string[] = [
   'Du bist ein Soziopath! Sogar der Chat hat kurz Angst bekommen.',

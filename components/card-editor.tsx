@@ -35,14 +35,22 @@ export default function CardEditor({ cards, onRefresh }: Props) {
         method: 'POST',
         body: formData,
       })
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.details || errData.error || `HTTP Status ${res.status}`)
+      }
+
       const data = await res.json()
       if (data.url) {
         setEditing((s) => ({ ...s, image: data.url }))
         setUploadedImages((u) => [{ id: Date.now().toString(), url: data.url, name: file.name }, ...u])
+      } else {
+        throw new Error('Keine URL im Server-Response empfangen.')
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Upload failed', err)
-      alert('Upload fehlgeschlagen')
+      alert(`Upload fehlgeschlagen: ${err.message || err}`)
     } finally {
       setUploading(false)
     }
@@ -56,6 +64,7 @@ export default function CardEditor({ cards, onRefresh }: Props) {
 
   function handleDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault()
+    e.stopPropagation()
     const file = e.dataTransfer.files?.[0]
     if (!file) return
     uploadFile(file)
@@ -63,6 +72,7 @@ export default function CardEditor({ cards, onRefresh }: Props) {
 
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault()
+    e.stopPropagation()
   }
 
   function handleSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
